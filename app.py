@@ -15,7 +15,7 @@ def init_app():
     app = Flask(__name__)
 
     # set the secret key.  keep this really secret:
-    app.secret_key = os.environ['AGAVA_SECRET_KEY'] 
+    app.secret_key = os.environ['AGAVA_SECRET_KEY']
 
     # 8GB file size limit
     FILE_SIZE_LIMIT = 8000000000
@@ -26,13 +26,13 @@ def init_app():
         """
         is_valid = True
         message = ''
-        
+
         if file_url:
 
-            resource = requests.head(file_url, headers={'Accept-Encoding': 'identity'}) 
-            
+            resource = requests.head(file_url, headers={'Accept-Encoding': 'identity'})
+
             for resp in resource.history:
-                
+
                 if resp.status_code != 200:
                     is_valid = False
                     message = 'file not found'
@@ -43,7 +43,7 @@ def init_app():
                     break
 
             if is_valid and (int(resource.headers['content-length']) > FILE_SIZE_LIMIT):
-                is_valid = False       
+                is_valid = False
                 message = 'file size larger than 8GB limit'
 
         else:
@@ -58,7 +58,7 @@ def init_app():
         """ generate image preview
         """
         req = request.get_json(force=True)
-        
+
         is_valid, message = file_is_valid(req.get('file_url', None))
 
         if is_valid:
@@ -66,8 +66,8 @@ def init_app():
             local_filename = 'temp/{0}_{1}'.format(unique_id, req.get('file_name', ''))
 
             resource = requests.get(req['file_url'], stream=True)
-           
-            # download image asset locally 
+
+            # download image asset locally
             with open(local_filename, 'wb') as f:
 
                 for chunk in resource.iter_content(chunk_size=1024):
@@ -89,41 +89,26 @@ def init_app():
 
         return jsonify(result=request.get_json(force=True), success=True)
 
-
-    # initiliaze api error responses
     @app.errorhandler(400)
-    def bad_request(error):
-        """ Bad Request
-        """
-        return make_response(jsonify( { 'error': 'request cannot be fulfilled due to bad syntax' } ), 400)
-
-
     @app.errorhandler(401)
-    def unauthorized(error):
-        """ Unauthorized
-        """
-        return make_response(jsonify( { 'error': 'authentication is possible but has failed' } ), 401)
-
-
     @app.errorhandler(403)
-    def forbidden(error):
-        """ Forbidden
-        """
-        return make_response(jsonify( { 'error': 'server refuses to respond to request' } ), 403)
-
-
     @app.errorhandler(404)
-    def not_found(error):
-        """ 404 Not Found
-        """
-        return make_response(jsonify( { 'error': 'requested resource could not be found' } ), 404)
-
-
     @app.errorhandler(405)
-    def method_not_allowed(error):
-        """ Method not Allowed
+    def bad_request(error):
+        """ HTTP error handling
         """
-        return make_response(jsonify( { 'error': 'request method not supported by that resource' } ), 405)
+        messages = {
+            400: 'request cannot be fulfilled due to bad syntax',
+            401: 'authentication is possible but has failed',
+            403: 'server refuses to respond to request',
+            404: 'requested resource could not be found',
+            405: 'request method not supported by that resource',
+            'error': 'server error!'
+        }
+
+        message = messages[error.code] if error.code in messages else messages['error']
+
+        return make_response(jsonify(error=message), error.code)
 
 
     return app
