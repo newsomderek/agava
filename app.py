@@ -53,19 +53,16 @@ def init_app():
         return is_valid, message
 
 
-    @app.route("/generate", methods=['POST', 'GET'])
-    def generate_preview():
-        """ generate image preview
+    def download_file(url, name):
+        """ Download file and insure a unique file name
         """
-        req = request.get_json(force=True)
-
-        is_valid, message = file_is_valid(req.get('file_url', None))
+        is_valid, message = file_is_valid(url)
 
         if is_valid:
             unique_id = str(uuid.uuid4().hex)
-            local_filename = 'temp/{0}_{1}'.format(unique_id, req.get('file_name', ''))
+            local_filename = 'temp/{0}_{1}'.format(unique_id, name)
 
-            resource = requests.get(req['file_url'], stream=True)
+            resource = requests.get(url, stream=True)
 
             # download image asset locally
             with open(local_filename, 'wb') as f:
@@ -76,13 +73,27 @@ def init_app():
                         f.write(chunk)
                         f.flush()
 
+            return local_filename, message
+
+        return None, message
+
+    @app.route("/generate", methods=['POST', 'GET'])
+    def generate_preview():
+        """ generate image preview
+        """
+        req = request.get_json(force=True)
+
+        local_file, message = download_file(req.get('file_url', None), req.get('file_name', ''))
+
+        if local_file:
+
             if req['file_name'].split('.')[-1].lower() == 'psd':
 
                 # generate preview
-                with Image(filename='{0}[0]'.format(local_filename)) as img:
+                with Image(filename='{0}[0]'.format(local_file)) as img:
                     img.format = 'png'
                     img.transform(resize='250x')
-                    img.save(filename='temp/RESIZED_{0}_{1}.png'.format(unique_id, req.get('file_name', '')))
+                    img.save(filename='temp/RESIZED_{0}.png'.format(req.get('file_name', '')))
 
         else:
             return jsonify(result=message, success=False)
