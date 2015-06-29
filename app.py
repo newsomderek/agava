@@ -87,7 +87,7 @@ def init_app():
 
         if local_file:
 
-            if req['file_name'].split('.')[-1].lower() == 'psd':
+            if (req['file_name'].split('.')[-1].lower() == 'psd') or (req['file_name'].split('.')[-1].lower() == 'psb'):
 
                 # generate preview
                 with Image(filename='{0}[0]'.format(local_file)) as img:
