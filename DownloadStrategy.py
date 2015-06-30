@@ -21,7 +21,7 @@ class DownloadStrategy:
         """ Download the inbound file. Needs to be implmented!
 
             Args:
-                url (str): inbound file download url
+                url  (str): inbound file download url
                 name (str): outbound file name
 
             Returns:
@@ -93,7 +93,7 @@ class DownloadStrategyDefault(DownloadStrategy):
         """ Download the inbound file locally
 
             Args:
-                url (str): inbound file download url
+                url  (str): inbound file download url
                 name (str): outbound file name
 
             Returns:
