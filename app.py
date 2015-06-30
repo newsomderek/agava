@@ -22,14 +22,14 @@ def init_app():
 
     @app.route("/generate", methods=['POST'])
     def generate_preview():
-        """ generate image preview
+        """ Generate image preview
         """
         try:
             req = request.get_json(force=True)
 
             download_strategy = DownloadStrategyDefault()
 
-            # throw excpetion if file does not exists or is too large
+            # throw exception if file does not exists or is too large
             download_strategy.validate(req.get('file_url', None))
 
             local_file_path = download_strategy.download(
