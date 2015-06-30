@@ -8,7 +8,7 @@ from util import file_is_valid
 
 
 class DownloadStrategy:
-    """ Interface for file download Strategy
+    """ Interface for file download strategy
     """
 
     # 8GB file size limit by default
@@ -24,7 +24,7 @@ class DownloadStrategy:
             Returns:
                 str: local path to original inbound file
         """
-        raise NotImplementedError('DownloadStrategy is needs to be implmented!')
+        raise NotImplementedError('DownloadStrategy needs to be implmented!')
 
     def validate(self, url):
         """ Check if file exists and is not too large
@@ -33,7 +33,7 @@ class DownloadStrategy:
                 url (str): file download url
 
             Returns:
-                bool: True if file exists or throws an Exception
+                bool: True if file exists or otherwise throws an Exception
         """
 
         # check if file url is provided
@@ -47,7 +47,7 @@ class DownloadStrategy:
         redirect_history = [resp for resp in resource.history]
 
         if redirect_history and (redirect_history[-1].status_code != 200):
-            raise Exception('Last redirect of inbound file did not yield a 200 http status code')
+            raise Exception('Last redirect of inbound file did not yield a 200 http status code!')
 
         # check for a http status success code
         if (not redirect_history) and (resource.status_code != 200):
@@ -61,7 +61,7 @@ class DownloadStrategy:
 
 
 class DownloadStrategyDefault(DownloadStrategy):
-    """ Default download Strategy
+    """ Default download strategy
     """
 
     def download(self, url, name):
@@ -75,7 +75,7 @@ class DownloadStrategyDefault(DownloadStrategy):
                 str: local path to original inbound file
         """
 
-        # throw excpetion if file does not exists or is too large
+        # throw exception if file does not exists or is too large
         self.validate(url)
 
         try:
