@@ -46,7 +46,7 @@ def init_app():
                     img.save(filename='temp/RESIZED_{0}.png'.format(req.get('file_name', '')))
 
             # remove original inbound file
-            os.remove(local_file_path)
+            download_strategy.remove(local_file_path)
 
             return jsonify(result=request.get_json(force=True), success=True)
 

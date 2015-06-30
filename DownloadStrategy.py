@@ -29,6 +29,17 @@ class DownloadStrategy:
         """
         raise NotImplementedError('DownloadStrategy needs to be implmented!')
 
+    def remove(self, path):
+        """ Remove local file
+
+            Args:
+                path (str): path to local file
+
+            Returns:
+                None: returns nothing or exception if error is raised
+        """
+        os.remove(path)
+
     def validate(self, url):
         """ Check if file exists and is not too large
 
