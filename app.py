@@ -32,6 +32,7 @@ def init_app():
             # throw exception if file does not exists or is too large
             download_strategy.validate(req.get('file_url', None))
 
+            # download inbound file
             local_file_path = download_strategy.download(
                                     url=req.get('file_url', None),
                                     name=req.get('file_name', '')
