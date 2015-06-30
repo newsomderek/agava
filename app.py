@@ -8,8 +8,7 @@ import os
 import requests
 import uuid
 
-from util import file_is_valid
-from DownloadStrategy import DownloadStrategy
+from DownloadStrategy import DownloadStrategyDefault
 
 
 def init_app():
@@ -17,32 +16,39 @@ def init_app():
     """
     app = Flask(__name__)
 
-    # set the secret key.  keep this really secret:
+    # set the secret key.  keep this really secret
     app.secret_key = os.environ['AGAVA_SECRET_KEY']
 
 
-    @app.route("/generate", methods=['POST', 'GET'])
+    @app.route("/generate", methods=['POST'])
     def generate_preview():
         """ generate image preview
         """
-        req = request.get_json(force=True)
+        try:
+            req = request.get_json(force=True)
 
-        download_strategy = DownloadStrategy()
+            download_strategy = DownloadStrategyDefault()
 
-        local_file_path = download_strategy.download(
-                                url=req.get('file_url', None),
-                                name=req.get('file_name', '')
-                          )
+            # throw excpetion if file does not exists or is too large
+            download_strategy.validate(req.get('file_url', None))
 
-        if (req['file_name'].split('.')[-1].lower() == 'psd') or (req['file_name'].split('.')[-1].lower() == 'psb'):
+            local_file_path = download_strategy.download(
+                                    url=req.get('file_url', None),
+                                    name=req.get('file_name', '')
+                              )
 
-            # generate preview
-            with Image(filename='{0}[0]'.format(local_file_path)) as img:
-                img.format = 'png'
-                img.transform(resize='250x')
-                img.save(filename='temp/RESIZED_{0}.png'.format(req.get('file_name', '')))
+            if (req['file_name'].split('.')[-1].lower() == 'psd') or (req['file_name'].split('.')[-1].lower() == 'psb'):
 
-        return jsonify(result=request.get_json(force=True), success=True)
+                # generate preview
+                with Image(filename='{0}[0]'.format(local_file_path)) as img:
+                    img.format = 'png'
+                    img.transform(resize='250x')
+                    img.save(filename='temp/RESIZED_{0}.png'.format(req.get('file_name', '')))
+
+            return jsonify(result=request.get_json(force=True), success=True)
+
+        except Exception as ex:
+            return jsonify(result=ex.message, success=False)
 
 
     @app.errorhandler(400)

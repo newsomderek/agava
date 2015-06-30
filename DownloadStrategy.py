@@ -2,65 +2,100 @@
 """
 import uuid
 import requests
+import os
 
 from util import file_is_valid
 
 
-class DownloadStrategyDefault(object):
+class DownloadStrategy:
+    """ Interface for file download Strategy
+    """
+
+    # 8GB file size limit by default
+    file_size_limit = os.environ.get('AGAVA_FILE_SIZE_LIMIT', 8000000000)
+
+    def download(self, url, name):
+        """ Download the inbound file. Needs to be implmented!
+
+            Args:
+                url (str): inbound file download url
+                name (str): outbound file name
+
+            Returns:
+                str: local path to original inbound file
+        """
+        raise NotImplementedError('DownloadStrategy is needs to be implmented!')
+
+    def validate(self, url):
+        """ Check if file exists and is not too large
+
+            Args:
+                url (str): file download url
+
+            Returns:
+                bool: True if file exists or throws an Exception
+        """
+
+        # check if file url is provided
+        if not url:
+            raise Exception('Inbound file not provided!')
+
+        resource = requests.head(url, headers={'Accept-Encoding': 'identity'})
+
+        # in the case of multiple url redirects, confirm the last redirect to the
+        # file was successful
+        redirect_history = [resp for resp in resource.history]
+
+        if redirect_history and (redirect_history[-1].status_code != 200):
+            raise Exception('Last redirect of inbound file did not yield a 200 http status code')
+
+        # check for a http status success code
+        if (not redirect_history) and (resource.status_code != 200):
+            raise Exception('Inbound file not found!')
+
+        # check if file is too large
+        if int(resource.headers['content-length']) > self.file_size_limit:
+            raise Exception('File size larger than {0} byte limit!'.format(self.file_size_limit))
+
+        return True
+
+
+class DownloadStrategyDefault(DownloadStrategy):
     """ Default download Strategy
     """
 
     def download(self, url, name):
         """ Download the inbound file locally
-        """
-        is_valid = file_is_valid(url)
-
-        if is_valid:
-
-            try:
-
-                local_file_path = 'temp/{0}_{1}'.format(str(uuid.uuid4().hex), name)
-
-                resource = requests.get(url, stream=True)
-
-                # download image asset locally
-                with open(local_file_path, 'wb') as f:
-
-                    for chunk in resource.iter_content(chunk_size=1024):
-
-                        if chunk: # filter out keep-alive new chunks
-                            f.write(chunk)
-                            f.flush()
-
-                return local_file_path
-
-            except:
-                raise Exception('Unable to download the inbound file!')
-
-        return None
-
-
-class DownloadStrategy(object):
-    """ Interface for file download Strategy
-    """
-
-    def __init__(self, strategy=DownloadStrategyDefault):
-        """
-        """
-        self.action = strategy()
-
-    def download(self, url, name):
-        """ Download method for inbound file persistance
 
             Args:
-                url  (str): downloadable url to inbound file
-                name (str): name of outbound file
+                url (str): inbound file download url
+                name (str): outbound file name
 
             Returns:
-                str: local file path of downloaded inbound file
+                str: local path to original inbound file
         """
-        if(self.action):
-            return self.action.download(url, name)
 
-        else:
-            raise NotImplementedError('DownloadStrategy is an abstract class!')
+        # throw excpetion if file does not exists or is too large
+        self.validate(url)
+
+        try:
+
+            local_file_path = 'temp/{0}_{1}'.format(str(uuid.uuid4().hex), name)
+
+            resource = requests.get(url, stream=True)
+
+            # download image asset locally
+            with open(local_file_path, 'wb') as f:
+
+                for chunk in resource.iter_content(chunk_size=1024):
+
+                    if chunk: # filter out keep-alive new chunks
+                        f.write(chunk)
+                        f.flush()
+
+            return local_file_path
+
+        except:
+            raise Exception('Unable to download the inbound file!')
+
+        return None
