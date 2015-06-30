@@ -72,5 +72,4 @@ def init_app():
 
         return make_response(jsonify(error=message), error.code)
 
-
     return app
