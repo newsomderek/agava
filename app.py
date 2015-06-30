@@ -45,6 +45,9 @@ def init_app():
                     img.transform(resize='250x')
                     img.save(filename='temp/RESIZED_{0}.png'.format(req.get('file_name', '')))
 
+            # remove original inbound file
+            os.remove(local_file_path)
+
             return jsonify(result=request.get_json(force=True), success=True)
 
         except Exception as ex:
