@@ -1,4 +1,4 @@
-""" agava image preview engine
+""" Agava Server
 """
 
 from flask import Flask, Request, Response

@@ -1,4 +1,4 @@
-""" Setup the flask application and register blueprints
+""" Welcome to Agava
 """
 
 from flask import Flask, make_response, jsonify, request
@@ -12,7 +12,7 @@ from DownloadStrategy import DownloadStrategyDefault
 
 
 def init_app():
-    """ Initialize the application entry points
+    """ Initialize
     """
     app = Flask(__name__)
 

@@ -1,4 +1,4 @@
-""" Development server!
+""" Agava Dev Server
 """
 
 from app import init_app
