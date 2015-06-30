@@ -14,6 +14,9 @@ class DownloadStrategy:
     # 8GB file size limit by default
     file_size_limit = os.environ.get('AGAVA_FILE_SIZE_LIMIT', 8000000000)
 
+    # root directory for local file storage
+    local_file_root = os.environ.get('AGAVA_LOCAL_FILE_ROOT', 'temp')
+
     def download(self, url, name):
         """ Download the inbound file. Needs to be implmented!
 
@@ -80,7 +83,7 @@ class DownloadStrategyDefault(DownloadStrategy):
 
         try:
 
-            local_file_path = 'temp/{0}_{1}'.format(str(uuid.uuid4().hex), name)
+            local_file_path = '{0}/{1}_{2}'.format(self.local_file_root, str(uuid.uuid4().hex), name)
 
             resource = requests.get(url, stream=True)
 
