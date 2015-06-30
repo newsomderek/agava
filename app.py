@@ -2,13 +2,13 @@
 """
 
 from flask import Flask, make_response, jsonify, request
-from wand.image import Image
 
 import os
 import requests
 import uuid
 
 from DownloadStrategy import DownloadStrategyDefault
+from PreviewStrategy import PreviewStrategyGeneral
 
 
 def init_app():
@@ -38,13 +38,18 @@ def init_app():
                                     name=req.get('file_name', '')
                               )
 
-            if (req['file_name'].split('.')[-1].lower() == 'psd') or (req['file_name'].split('.')[-1].lower() == 'psb'):
+            general_preview_strategy = PreviewStrategyGeneral()
 
-                # generate preview
-                with Image(filename='{0}[0]'.format(local_file_path)) as img:
-                    img.format = 'png'
-                    img.transform(resize='250x')
-                    img.save(filename='temp/RESIZED_{0}.png'.format(req.get('file_name', '')))
+            extension = req['file_url'].split('.')[-1].lower()
+
+            # general image previews
+            if extension in general_preview_strategy.compatible_types:
+
+                general_preview_strategy.generate(
+                    path=local_file_path,
+                    name=req.get('file_name', ''),
+                    resize=750
+                )
 
             # remove original inbound file
             download_strategy.remove(local_file_path)

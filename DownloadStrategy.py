@@ -4,8 +4,6 @@ import uuid
 import requests
 import os
 
-from util import file_is_valid
-
 
 class DownloadStrategy:
     """ Interface for file download strategy
