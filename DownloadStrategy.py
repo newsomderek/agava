@@ -62,6 +62,17 @@ class DownloadStrategy:
 
         return True
 
+    def unique_path(self, name):
+        """ Get a unique local file path
+
+            Args:
+                name (str): name of the resulting file
+
+            Returns:
+                str: unique local file path
+        """
+        return '{0}/{1}_{2}'.format(self.local_file_root, str(uuid.uuid4().hex), name)
+
 
 class DownloadStrategyDefault(DownloadStrategy):
     """ Default download strategy
@@ -83,7 +94,7 @@ class DownloadStrategyDefault(DownloadStrategy):
 
         try:
 
-            local_file_path = '{0}/{1}_{2}'.format(self.local_file_root, str(uuid.uuid4().hex), name)
+            local_file_path = self.unique_path(name)
 
             resource = requests.get(url, stream=True)
 
