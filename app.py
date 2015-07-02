@@ -20,7 +20,6 @@ def init_app():
     # set the secret key.  keep this really secret
     app.secret_key = os.environ['AGAVA_SECRET_KEY']
 
-
     @app.route("/generate", methods=['POST'])
     def generate_preview():
         """ Generate image preview
@@ -43,7 +42,6 @@ def init_app():
 
              # 1 hour maximum for job to sit in queue before cancelled
             job_ttl = os.environ.get('AGAVA_TTL', 60 * 60)
-
 
             # add preview job to task queue
             job = q.enqueue_call(
