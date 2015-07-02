@@ -7,19 +7,24 @@ from PreviewStrategy import PreviewStrategyGeneral
 def generate_preview_task(url, name):
     """ Generate preview from inbound file
     """
-    download_strategy = DownloadStrategyDefault()
+    try:
 
-    # download inbound file
-    local_file_path = download_strategy.download(url, name)
+        download_strategy = DownloadStrategyDefault()
 
-    general_preview_strategy = PreviewStrategyGeneral()
+        # download inbound file
+        local_file_path = download_strategy.download(url, name)
 
-    extension = url.split('.')[-1].lower()
+        general_preview_strategy = PreviewStrategyGeneral()
 
-    # general image previews
-    if extension in general_preview_strategy.compatible_types:
+        extension = url.split('.')[-1].lower()
 
-        general_preview_strategy.generate(local_file_path, name, resize=750)
+        # general image previews
+        if extension in general_preview_strategy.compatible_types:
 
-    # remove original inbound file
-    download_strategy.remove(local_file_path)
+            general_preview_strategy.generate(local_file_path, name, resize=750)
+
+        # remove original inbound file
+        download_strategy.remove(local_file_path)
+
+    except Exception as ex:
+        pass
