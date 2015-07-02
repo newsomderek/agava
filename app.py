@@ -4,11 +4,9 @@
 from flask import Flask, make_response, jsonify, request
 
 import os
-import requests
-import uuid
 
 from DownloadStrategy import DownloadStrategyDefault
-from PreviewStrategy import PreviewStrategyGeneral
+from GeneratePreviewTask import generate_preview_task
 
 
 def init_app():
@@ -32,27 +30,7 @@ def init_app():
             # throw exception if file does not exists or is too large
             download_strategy.validate(req.get('file_url', None))
 
-            # download inbound file
-            local_file_path = download_strategy.download(
-                                    url=req.get('file_url', None),
-                                    name=req.get('file_name', '')
-                              )
-
-            general_preview_strategy = PreviewStrategyGeneral()
-
-            extension = req['file_url'].split('.')[-1].lower()
-
-            # general image previews
-            if extension in general_preview_strategy.compatible_types:
-
-                general_preview_strategy.generate(
-                    path=local_file_path,
-                    name=req.get('file_name', ''),
-                    resize=750
-                )
-
-            # remove original inbound file
-            download_strategy.remove(local_file_path)
+            generate_preview_task(req.get('file_url', None), req.get('file_name', ''))
 
             return jsonify(result=request.get_json(force=True), success=True)
 
