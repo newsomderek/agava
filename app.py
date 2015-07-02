@@ -7,6 +7,9 @@ import os
 
 from DownloadStrategy import DownloadStrategyDefault
 from GeneratePreviewTask import generate_preview_task
+from redis import Redis
+from rq import Queue
+from rq.job import Job
 
 
 def init_app():
@@ -30,12 +33,70 @@ def init_app():
             # throw exception if file does not exists or is too large
             download_strategy.validate(req.get('file_url', None))
 
-            generate_preview_task(req.get('file_url', None), req.get('file_name', ''))
+            q = Queue(connection=Redis())
 
-            return jsonify(result=request.get_json(force=True), success=True)
+            # 30 minutes default before job times out
+            job_timeout = os.environ.get('AGAVA_TIMEOUT', 60 * 30)
+
+            # 1 day default before job results expire
+            job_result_ttl = os.environ.get('AGAVA_RESULT_TTL', 60 * 60 * 24)
+
+             # 1 hour maximum for job to sit in queue before cancelled
+            job_ttl = os.environ.get('AGAVA_TTL', 60 * 60)
+
+
+            # add preview job to task queue
+            job = q.enqueue_call(
+                func=generate_preview_task,
+                args=(req.get('file_url', None), req.get('file_name', '')),
+                timeout=job_timeout,
+                result_ttl=job_result_ttl,
+                ttl=job_ttl
+            )
+
+            result = {
+                'job_id': job.id,
+                'images': []
+            }
+
+            return jsonify(result=result)
 
         except Exception as ex:
-            return jsonify(result=ex.message, success=False)
+
+            result = {
+                'error': ex.message
+            }
+
+            return jsonify(result=result), 500
+
+
+
+    @app.route("/job/<string:job_id>", methods=['GET'])
+    def get_job(job_id):
+        """ Get preview job details
+        """
+        try:
+
+            job = Job.fetch(job_id, connection=Redis())
+
+            if job:
+
+                result = {
+                    'id': job.id,
+                    'status': job._status
+                }
+
+                return jsonify(result=result)
+
+            raise Exception('unable to find job')
+
+        except Exception as ex:
+
+            result = {
+                'error': ex.message
+            }
+
+            return jsonify(result=result), 404
 
 
     @app.errorhandler(400)
@@ -57,6 +118,6 @@ def init_app():
 
         message = messages[error.code] if error.code in messages else messages['error']
 
-        return make_response(jsonify(error=message), error.code)
+        return jsonify(error=message), error.code
 
     return app
