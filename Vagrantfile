@@ -79,6 +79,17 @@ Vagrant.configure(2) do |config|
       pip install requests
       pip install requests[security]
       pip install rq
+
+      # install redis
+      apt-get -y install build-essential
+      apt-get -y install tcl8.5
+      wget http://download.redis.io/releases/redis-stable.tar.gz
+      tar xzf redis-stable.tar.gz
+      cd redis-stable
+      make
+      sudo make install
+      cd utils
+      sudo ./install_server.sh
   SHELL
 
 end
