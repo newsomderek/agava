@@ -9,6 +9,13 @@ from redis import Redis
 
 def generate_preview_task(url, name):
     """ Generate preview from inbound file
+
+        Args:
+            url  (str): inbound file download url
+            name (str): outbound file name
+
+        Returns:
+            None
     """
     try:
 
