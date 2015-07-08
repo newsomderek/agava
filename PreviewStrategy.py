@@ -42,7 +42,12 @@ class PreviewStrategy:
             Returns:
                 str: unique local file path
         """
-        return '{0}/R_{1}_{2}.{3}'.format(self.preview_root, str(uuid.uuid4().hex), name, format.lower())
+        return '{0}/R_{1}_{2}.{3}'.format(
+            self.preview_root,
+            str(uuid.uuid4().hex),
+            name,
+            format.lower()
+        )
 
 
     def dimensions(self, path, width=None, height=None, resize=None):
@@ -147,7 +152,13 @@ class PreviewStrategyGeneral(PreviewStrategy):
 
                     else:
                         # does not allow image distortion
-                        img.transform(resize=self.dimensions(path, width=width, height=height, resize=resize))
+                        img.transform(
+                            resize=self.dimensions(path,
+                                        width=width,
+                                        height=height,
+                                        resize=resize
+                                    )
+                        )
 
                     img.save(filename=self.unique_path(name, format))
 
