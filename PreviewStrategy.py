@@ -114,6 +114,9 @@ class PreviewStrategyGeneral(PreviewStrategy):
     """
 
     def __init__(self):
+
+        PreviewStrategy.__init__(self)
+
         # compatible file types
         self.compatible_types = ['psd', 'psb', 'jpg', 'jpeg', 'png']
 
@@ -136,7 +139,16 @@ class PreviewStrategyGeneral(PreviewStrategy):
                 # generate preview
                 with Image(filename='{0}[0]'.format(path)) as img:
                     img.format = format
-                    img.transform(resize=self.dimensions(path, width=width, height=height, resize=resize))
+
+                    if width and height:
+
+                        # allow potential image distortion
+                        img.resize(width, height)
+
+                    else:
+                        # does not allow image distortion
+                        img.transform(resize=self.dimensions(path, width=width, height=height, resize=resize))
+
                     img.save(filename=self.unique_path(name, format))
 
         except Exception as ex:

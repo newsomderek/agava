@@ -7,7 +7,7 @@ from rq import get_current_job
 from redis import Redis
 
 
-def generate_preview_task(url, name):
+def generate_preview_task(url, name, width, height, resize):
     """ Generate preview from inbound file
 
         Args:
@@ -31,7 +31,7 @@ def generate_preview_task(url, name):
         # general image previews
         if extension in general_preview_strategy.compatible_types:
 
-            general_preview_strategy.generate(local_file_path, name, resize=750)
+            general_preview_strategy.generate(local_file_path, name, width=width, height=height, resize=resize)
 
         # remove original inbound file
         download_strategy.remove(local_file_path)

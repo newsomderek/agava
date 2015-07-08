@@ -27,10 +27,17 @@ def init_app():
         try:
             req = request.get_json(force=True)
 
+            # process request arguments
+            url = req.get('url', None)
+            name = req.get('name', '')
+            width = req.get('width', None)
+            height = req.get('height', None)
+            resize = req.get('resize', None)
+
             download_strategy = DownloadStrategyDefault()
 
             # throw exception if file does not exists or is too large
-            download_strategy.validate(req.get('file_url', None))
+            download_strategy.validate(url)
 
             q = Queue(connection=Redis())
 
@@ -46,7 +53,7 @@ def init_app():
             # add preview job to task queue
             job = q.enqueue_call(
                 func=generate_preview_task,
-                args=(req.get('file_url', None), req.get('file_name', '')),
+                args=(url, name, width, height, resize),
                 timeout=job_timeout,
                 result_ttl=job_result_ttl,
                 ttl=job_ttl
