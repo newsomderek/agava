@@ -84,6 +84,10 @@ def init_app():
                     'status': job._status
                 }
 
+                # add error info if it exists
+                if 'error' in job.meta:
+                    result['error'] = job.meta['error']
+
                 return jsonify(result=result)
 
             raise Exception('unable to find job')

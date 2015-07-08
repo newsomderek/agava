@@ -3,6 +3,9 @@
 from DownloadStrategy import DownloadStrategyDefault
 from PreviewStrategy import PreviewStrategyGeneral
 
+from rq import get_current_job
+from redis import Redis
+
 
 def generate_preview_task(url, name):
     """ Generate preview from inbound file
@@ -27,4 +30,15 @@ def generate_preview_task(url, name):
         download_strategy.remove(local_file_path)
 
     except Exception as ex:
-        pass
+
+        # get current running queue job
+        job = get_current_job(connection=Redis())
+
+        if job:
+
+            job.meta['error'] = ex.message;
+
+            job.save()
+
+        # re-raise exception so RQ job is flagged properly as failed
+        raise ex
