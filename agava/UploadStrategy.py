@@ -8,6 +8,8 @@ class UploadStrategy:
     """ Interface for file upload strategy
     """
 
+    host = os.environ.get('AGAVA_HOST', 'http://localhost:8080')
+
     # root directory for local file storage
     local_file_root = os.environ.get('AGAVA_LOCAL_FILE_ROOT', 'temp')
 
@@ -38,7 +40,7 @@ class UploadStrategyPostback(UploadStrategy):
         """
 
         try:
-            requests.post(postback_url, data=postback_data)
+            requests.post(postback_url, data=postback_data.update({'download': path}))
 
         except Exception as ex:
 

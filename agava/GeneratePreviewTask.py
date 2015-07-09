@@ -53,7 +53,7 @@ def generate_preview_task(url, name, width, height, resize, postback):
             # send outbound image preview on its way
             if postback:
                 upload_strategy = UploadStrategyPostback()
-                upload_strategy.upload(preview_path, postback, job.meta)
+                upload_strategy.upload('{0}/job/{1}/preview'.format(upload_strategy.host, job.id), postback, job.meta)
 
         # remove original inbound file
         download_strategy.remove(local_file_path)
