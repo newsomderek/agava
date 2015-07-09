@@ -1,7 +1,7 @@
 """ Agava Dev Server
 """
 
-from app import init_app
+from agava.app import init_app
 
 app = init_app()
 app.debug = True

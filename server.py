@@ -2,7 +2,7 @@
 """
 
 from flask import Flask, Request, Response
-from app import init_app
+from agava.app import init_app
 
 #from flask_sslify import SSLify
 

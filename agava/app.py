@@ -5,8 +5,8 @@ from flask import Flask, make_response, jsonify, request
 
 import os
 
-from DownloadStrategy import DownloadStrategyDefault
-from GeneratePreviewTask import generate_preview_task
+from agava.DownloadStrategy import DownloadStrategyDefault
+from agava.GeneratePreviewTask import generate_preview_task
 from redis import Redis
 from rq import Queue
 from rq.job import Job

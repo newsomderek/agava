@@ -1,7 +1,7 @@
 """ Generate Preview Task
 """
-from DownloadStrategy import DownloadStrategyDefault
-from PreviewStrategy import PreviewStrategyGeneral
+from agava.DownloadStrategy import DownloadStrategyDefault
+from agava.PreviewStrategy import PreviewStrategyGeneral
 
 from rq import get_current_job
 from redis import Redis
