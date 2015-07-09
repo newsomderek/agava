@@ -133,6 +133,7 @@ class DownloadStrategy:
                 'width': img.width,
                 'height': img.height,
                 'md5': self.get_md5(path),
+                'size': os.path.getsize(path),
                 # extract all exif metadata
                 'exif': {k[len('exif:'):]: image_metadata[k] for k in image_metadata.keys() if k.startswith('exif:')},
                 # extract all xmp metadata
