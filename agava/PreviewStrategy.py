@@ -161,7 +161,11 @@ class PreviewStrategyGeneral(PreviewStrategy):
                                     )
                         )
 
-                    img.save(filename=self.unique_path(name, format))
+                    preview_path = self.unique_path(name, format)
+
+                    img.save(filename=preview_path)
+
+                    return preview_path
 
         except Exception as ex:
             raise Exception(ex.message)

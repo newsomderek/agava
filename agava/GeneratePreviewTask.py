@@ -1,13 +1,14 @@
 """ Generate Preview Task
 """
 from agava.DownloadStrategy import DownloadStrategyDefault
+from agava.UploadStrategy import UploadStrategyPostback
 from agava.PreviewStrategy import PreviewStrategyGeneral
 
 from rq import get_current_job
 from redis import Redis
 
 
-def generate_preview_task(url, name, width, height, resize):
+def generate_preview_task(url, name, width, height, resize, postback):
     """ Generate preview from inbound file
 
         Args:
@@ -36,7 +37,7 @@ def generate_preview_task(url, name, width, height, resize):
         # general image previews
         if extension in general_preview_strategy.compatible_types:
 
-            general_preview_strategy.generate(
+            preview_path = general_preview_strategy.generate(
                 local_file_path,
                 name,
                 width=width,
@@ -47,6 +48,11 @@ def generate_preview_task(url, name, width, height, resize):
             # update job with file metadata
             job.meta.update(download_strategy.get_metadata(local_file_path))
             job.save()
+
+            # send outbound image preview on its way
+            if postback:
+                upload_strategy = UploadStrategyPostback()
+                upload_strategy.upload(preview_path, postback, job.meta)
 
         # remove original inbound file
         download_strategy.remove(local_file_path)

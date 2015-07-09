@@ -2,14 +2,14 @@
 """
 
 from flask import Flask, make_response, jsonify, request
+from redis import Redis
+from rq import Queue
+from rq.job import Job
 
 import os
 
 from agava.DownloadStrategy import DownloadStrategyDefault
 from agava.GeneratePreviewTask import generate_preview_task
-from redis import Redis
-from rq import Queue
-from rq.job import Job
 
 
 def init_app():
@@ -33,6 +33,7 @@ def init_app():
             width = req.get('width', None)
             height = req.get('height', None)
             resize = req.get('resize', None)
+            postback = req.get('postback', None)
 
             download_strategy = DownloadStrategyDefault()
 
@@ -53,7 +54,7 @@ def init_app():
             # add preview job to task queue
             job = q.enqueue_call(
                 func=generate_preview_task,
-                args=(url, name, width, height, resize),
+                args=(url, name, width, height, resize, postback),
                 timeout=job_timeout,
                 result_ttl=job_result_ttl,
                 ttl=job_ttl
