@@ -47,6 +47,7 @@ def generate_preview_task(url, name, width, height, resize, postback):
 
             # update job with file metadata
             job.meta.update(download_strategy.get_metadata(local_file_path))
+            job.meta.update({'path': preview_path})
             job.save()
 
             # send outbound image preview on its way

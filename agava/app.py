@@ -1,7 +1,7 @@
 """ Welcome to Agava
 """
 
-from flask import Flask, make_response, jsonify, request
+from flask import Flask, make_response, jsonify, request, send_file
 from redis import Redis
 from rq import Queue
 from rq.job import Job
@@ -69,11 +69,7 @@ def init_app():
 
         except Exception as ex:
 
-            result = {
-                'error': ex.message
-            }
-
-            return jsonify(result=result), 500
+            return jsonify(error=ex.message), 500
 
 
 
@@ -93,17 +89,32 @@ def init_app():
                     'meta': job.meta
                 }
 
+                # remove local path reference
+                del result['meta']['path']
+
                 return jsonify(result=result)
 
             raise Exception('unable to find job')
 
         except Exception as ex:
 
-            result = {
-                'error': ex.message
-            }
+            return jsonify(error=ex.message), 404
 
-            return jsonify(result=result), 404
+    @app.route("/job/<string:job_id>/preview", methods=['GET'])
+    def get_preview(job_id):
+        """ Get job image preview
+        """
+        try:
+            job = Job.fetch(job_id, connection=Redis())
+
+            if job and job.meta.get('path', None):
+                return make_response(send_file('../{0}'.format(job.meta['path'])))
+
+            raise Exception()
+
+        except Exception as ex:
+
+            return jsonify(error='unable to find job'), 404
 
 
     @app.errorhandler(400)
