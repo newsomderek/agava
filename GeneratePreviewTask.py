@@ -17,7 +17,12 @@ def generate_preview_task(url, name, width, height, resize):
         Returns:
             None
     """
+    job = None
+
     try:
+
+        # get current running queue job
+        job = get_current_job(connection=Redis())
 
         download_strategy = DownloadStrategyDefault()
 
@@ -39,13 +44,14 @@ def generate_preview_task(url, name, width, height, resize):
                 resize=resize
             )
 
+            # update job with file metadata
+            job.meta.update(download_strategy.get_metadata(local_file_path))
+            job.save()
+
         # remove original inbound file
         download_strategy.remove(local_file_path)
 
     except Exception as ex:
-
-        # get current running queue job
-        job = get_current_job(connection=Redis())
 
         if job:
 

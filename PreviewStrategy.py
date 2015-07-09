@@ -143,6 +143,7 @@ class PreviewStrategyGeneral(PreviewStrategy):
 
                 # generate preview
                 with Image(filename='{0}[0]'.format(path)) as img:
+
                     img.format = format
 
                     if width and height:

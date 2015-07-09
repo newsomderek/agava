@@ -3,6 +3,9 @@
 import uuid
 import requests
 import os
+import hashlib
+
+from wand.image import Image
 
 
 class DownloadStrategy:
@@ -81,6 +84,70 @@ class DownloadStrategy:
                 str: unique local file path
         """
         return '{0}/{1}_{2}'.format(self.local_file_root, str(uuid.uuid4().hex), name)
+
+    def get_md5(self, path):
+        """ Generate file md5 hash
+
+            Args:
+                path (str): path to local file
+
+            Returns:
+                str: md5 hash of the file
+        """
+
+        # find an efficient block size for reading the file
+        blocksize = (2**20) if os.path.getsize(path) > (2**20) else 128
+
+        file_hash = hashlib.md5()
+
+        with open(path, "rb" ) as f:
+
+            while True:
+
+                buf = f.read(blocksize)
+
+                if not buf:
+                    break
+
+                file_hash.update(buf)
+
+        return file_hash.hexdigest()
+
+    def get_metadata(self, path):
+        """ Get file metadata
+
+            Args:
+                img (wand.image.Image): Wand Image object
+
+            Returns:
+                dict: file metadata
+        """
+        meta = {}
+
+        with Image(filename=path) as img:
+
+            # extract all basic metadata
+            image_metadata = {k: v for k, v in img.metadata.items()}
+
+            print image_metadata
+
+            meta = {
+                'width': img.width,
+                'height': img.height,
+                'md5': self.get_md5(path),
+                # extract all exif metadata
+                'exif': {k[len('exif:'):]: image_metadata[k] for k in image_metadata.keys() if k.startswith('exif:')},
+                # extract all xmp metadata
+                'xmp': {k[len('xmp:'):]: image_metadata[k] for k in image_metadata.keys() if k.startswith('xmp:')},
+            }
+
+            if 'date:create' in image_metadata:
+                meta['created'] = image_metadata['date:create']
+
+            if 'date:modify' in image_metadata:
+                meta['modified'] = image_metadata['date:modify']
+
+        return meta
 
 
 class DownloadStrategyDefault(DownloadStrategy):

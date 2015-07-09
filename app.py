@@ -88,11 +88,9 @@ def init_app():
 
                 result = {
                     'id': job.id,
-                    'status': job._status
+                    'status': job._status,
+                    'meta': job.meta
                 }
-
-                # include job metadata
-                result.update((key, job.meta[key]) for key in job.meta.keys())
 
                 return jsonify(result=result)
 
