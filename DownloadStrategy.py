@@ -129,8 +129,6 @@ class DownloadStrategy:
             # extract all basic metadata
             image_metadata = {k: v for k, v in img.metadata.items()}
 
-            print image_metadata
-
             meta = {
                 'width': img.width,
                 'height': img.height,
