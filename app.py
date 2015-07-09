@@ -91,9 +91,8 @@ def init_app():
                     'status': job._status
                 }
 
-                # add error info if it exists
-                if 'error' in job.meta:
-                    result['error'] = job.meta['error']
+                # include job metadata
+                result.update((key, job.meta[key]) for key in job.meta.keys())
 
                 return jsonify(result=result)
 
