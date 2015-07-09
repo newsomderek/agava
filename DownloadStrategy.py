@@ -100,7 +100,7 @@ class DownloadStrategy:
 
         file_hash = hashlib.md5()
 
-        with open(path, "rb" ) as f:
+        with open(path, "rb") as f:
 
             while True:
 
