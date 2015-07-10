@@ -108,7 +108,7 @@ def init_app():
             job = Job.fetch(job_id, connection=Redis())
 
             if job and job.meta.get('path', None):
-                return make_response(send_file('../{0}'.format(job.meta['path'])))
+                return make_response(send_file('../{0}'.format(job.meta['path']), as_attachment=True))
 
             raise Exception()
 
