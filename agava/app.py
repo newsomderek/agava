@@ -9,6 +9,7 @@ from rq.job import Job
 import os
 
 from agava.DownloadStrategy import DownloadStrategyDefault
+from agava.UploadStrategy import UploadStrategyPostback
 from agava.GeneratePreviewTask import generate_preview_task
 
 
@@ -60,9 +61,12 @@ def init_app():
                 ttl=job_ttl
             )
 
+            host = os.environ.get('AGAVA_HOST', 'http://localhost:8080')
+
             result = {
                 'job_id': job.id,
-                'images': []
+                'job': '{0}/job/{1}'.format(host, job.id),
+                'download': '{0}/job/{1}/preview'.format(host, job.id)
             }
 
             return jsonify(result=result)
@@ -115,7 +119,7 @@ def init_app():
 
         except Exception as ex:
 
-            return jsonify(error='unable to find job'), 404
+            return jsonify(error='unable to retrieve preview'), 404
 
 
     @app.errorhandler(400)
