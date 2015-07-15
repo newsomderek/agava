@@ -29,21 +29,20 @@ class UploadStrategyPostback(UploadStrategy):
     """ Default upload postback strategy
     """
 
-    def upload(self, path, postback_url, postback_data):
+    def upload(self, postback_url, postback_data):
         """ Postback the preview image with metadata from the original inbound file
 
             Args:
-                path (str): path to local file
+                postback_url   (str): url to send postback data
+                postback_data (dict): postback image data
 
             Returns:
                 None
         """
 
         try:
-            requests.post(postback_url, data=postback_data.update({'download': path}))
+            requests.post(postback_url, data=postback_data)
 
         except Exception as ex:
 
             raise Exception('Unable to access to postback url')
-
-        return None

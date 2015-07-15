@@ -45,15 +45,20 @@ def generate_preview_task(url, name, width, height, resize, postback):
                 resize=resize
             )
 
+            upload_strategy = UploadStrategyPostback()
+
             # update job with file metadata
             job.meta.update(download_strategy.get_metadata(local_file_path))
             job.meta.update({'path': preview_path})
+
+            # public facing download url
+            job.meta.update({'download': '{0}/job/{1}/preview'.format(upload_strategy.host, job.id)})
+
             job.save()
 
             # send outbound image preview on its way
             if postback:
-                upload_strategy = UploadStrategyPostback()
-                upload_strategy.upload('{0}/job/{1}/preview'.format(upload_strategy.host, job.id), postback, job.meta)
+                upload_strategy.upload(postback, job.meta)
 
         # remove original inbound file
         download_strategy.remove(local_file_path)
