@@ -90,7 +90,8 @@ def init_app():
                 }
 
                 # remove local path reference
-                del result['meta']['path']
+                if 'path' in result['meta']:
+                    del result['meta']['path']
 
                 return jsonify(result=result)
 
